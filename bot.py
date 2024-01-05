@@ -24,11 +24,12 @@ async def say_hello(ctx):
 async def commands(ctx):
     await ctx.respond(
         """```ansi
-cà phê bot commands:
-\u001b[0;36m/commands - displays all commands\u001b[0;0m
-\u001b[0;36m/register - creates a user and accompanying db\u001b[0;0m
+guild receptionist commands:
+\u001b[0;36m/commands - lists all services\u001b[0;0m
+\u001b[0;36m/register - registers the adventurer as a guild member\u001b[0;0m
 \u001b[0;36m/create - creates a new quest\u001b[0;0m
-\u001b[0;36m/quests - displays the quest board\u001b[0;0m
+\u001b[0;36m/quests - displays the member's quest board\u001b[0;0m
+\u001b[0;36m/info - displays the guild member's card\u001b[0;0m
 ```"""
     )
 
@@ -76,13 +77,15 @@ class QuestForm(discord.ui.Modal):
         embed.add_field(name="Difficulty", value=self.children[3].value)
 
         bd.create_task(
+            interaction.user.id,
             (
                 self.children[0].value,
                 self.children[1].value,
                 self.children[2].value,
                 self.children[3].value,
-            )
+            ),
         )
+
         await interaction.response.send_message(embeds=[embed])
 
 
