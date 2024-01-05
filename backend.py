@@ -118,8 +118,3 @@ def active_tasks(user):
 
 def update_task(user, args):
     pass
-
-
-# init_users_db()
-# create_user(139988700636512256)
-# print(check_user(13998870063651225))
