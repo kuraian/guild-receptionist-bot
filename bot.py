@@ -60,7 +60,7 @@ class QuestForm(discord.ui.Modal):
                 label="Quest Description", style=discord.InputTextStyle.long
             )
         )
-        self.add_item(discord.ui.InputText(label="Due Date (Year-Month-Day)"))
+        self.add_item(discord.ui.InputText(label="Due Date (ex:2024-01-31)"))
         self.add_item(discord.ui.InputText(label="Difficulty"))
 
     async def callback(self, interaction: discord.Interaction):
@@ -70,11 +70,18 @@ class QuestForm(discord.ui.Modal):
             color=discord.Colour.darker_grey(),
         )
         embed.set_footer(
-            text="Quest issued on {date}.".format(date=datetime.date.today())
+            text="Quest issued on {date}".format(date=datetime.date.today())
         )
         embed.set_author(name="Quest Notice")
         embed.add_field(name="Due Date", value=self.children[2].value)
         embed.add_field(name="Difficulty", value=self.children[3].value)
+
+        valid_quest = True
+        try:
+            date = datetime.datetime.strptime(self.children[2].value, "%Y-%m-%d")
+            print(date)
+        except:
+            print("invalid date")
 
         bd.create_task(
             interaction.user.id,
@@ -85,7 +92,6 @@ class QuestForm(discord.ui.Modal):
                 self.children[3].value,
             ),
         )
-
         await interaction.response.send_message(embeds=[embed])
 
 
@@ -94,10 +100,25 @@ async def create_quest(ctx: discord.ApplicationContext):
     await ctx.send_modal(QuestForm(title="Quest Form"))
 
 
+class MyView(discord.ui.View):
+    def __init__(self, user_id, quest_id):
+        super().__init__()
+        self._user_id = user_id
+        self._quest_id = quest_id
+
+    @discord.ui.button(label="Turn in quest", style=discord.ButtonStyle.success)
+    async def button_callback(self, button, interaction):
+        bd.complete_task(self._user_id, self._quest_id)
+
+
 @bot.command(name="quests", description="pulls up the quest board")
 async def quests(ctx):
     vals = bd.active_tasks(ctx.author.id)
-    await ctx.respond(vals)
+    if vals:
+        for i in vals:
+            await ctx.respond(i, view=MyView(ctx.author.id, i[0]))
+    else:
+        await ctx.respond("No more quests")
 
 
 bot.run(TOKEN)

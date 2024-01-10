@@ -109,12 +109,17 @@ def active_tasks(user):
     conn = create_connection(str(user) + ".db")
     cur = conn.cursor()
 
-    sql = """SELECT * FROM tasks WHERE is_active=True"""
+    sql = """SELECT * FROM tasks WHERE is_active=1"""
     cur.execute(sql)
     rows = cur.fetchall()
 
     return rows
 
 
-def update_task(user, args):
-    pass
+def complete_task(user, arg):
+    conn = create_connection(str(user) + ".db")
+    cur = conn.cursor()
+
+    sql = """UPDATE tasks SET is_active = 0 WHERE id = ?"""
+    cur.execute(sql, tuple([arg]))
+    conn.commit()
