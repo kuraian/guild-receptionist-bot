@@ -109,6 +109,7 @@ class MyView(discord.ui.View):
     @discord.ui.button(label="Turn in quest", style=discord.ButtonStyle.success)
     async def button_callback(self, button, interaction):
         bd.complete_task(self._user_id, self._quest_id)
+        await interaction.response.send_message("quest finished!")
 
 
 @bot.command(name="quests", description="pulls up the quest board")
@@ -116,9 +117,23 @@ async def quests(ctx):
     vals = bd.active_tasks(ctx.author.id)
     if vals:
         for i in vals:
-            await ctx.respond(i, view=MyView(ctx.author.id, i[0]))
+            quest_embed = discord.Embed(
+                title=i[1],
+                description=i[2],
+                color=discord.Colour.darker_grey(),
+            )
+            quest_embed.set_footer(text="Quest issued on {date}".format(date=i[3]))
+            quest_embed.set_author(name="Quest Notice")
+            quest_embed.add_field(name="Due Date", value=i[4])
+            quest_embed.add_field(name="Difficulty", value=i[5])
+
+            await ctx.respond(embed=quest_embed, view=MyView(ctx.author.id, i[0]))
     else:
-        await ctx.respond("No more quests")
+        await ctx.respond(
+            """```ansi
+\u001b[1;31mno quests available...\u001b[0;0m
+```"""
+        )
 
 
 bot.run(TOKEN)

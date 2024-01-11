@@ -120,6 +120,6 @@ def complete_task(user, arg):
     conn = create_connection(str(user) + ".db")
     cur = conn.cursor()
 
-    sql = """UPDATE tasks SET is_active = 0 WHERE id = ?"""
-    cur.execute(sql, tuple([arg]))
+    sql = """UPDATE tasks SET is_active = 0, completed_date = ? WHERE id = ?"""
+    cur.execute(sql, (datetime.date.today(), arg))
     conn.commit()
